@@ -18,45 +18,38 @@ const formSections = [
   },
   {
     id: 2,
-    title: 'Founder identity',
-    fields: [
-      { key: 'business_name', label: 'Business name', placeholder: 'Type business name...' },
-      { key: 'founder_role', label: 'Role In Project', placeholder: 'Select a role' },
-      { key: 'experience_skills', label: 'Main Experience & Skills', placeholder: 'Select skills' },
-    ],
-  },
-  {
-    id: 3,
     title: 'Your Proposed Solution',
     fields: [
       { key: 'solution_description', label: 'Description of solution', placeholder: 'Describe your solution in short...' },
       { key: 'stage', label: 'Stage', placeholder: 'Select type' },
       { key: 'differentiation', label: 'Differentiation from competitors', placeholder: 'Type about this...' },
       { key: 'client_benefits', label: 'Concrete benefits for clients', placeholder: 'Type benefits here...' },
+      { key: 'long_term_vision', label: 'Long-term vision (3–5 years)', placeholder: 'Type your long-term vision here...' },
     ],
   },
   {
-    id: 4,
+    id: 3,
     title: 'Market Analysis & Customer insights',
     fields: [
       { key: 'primary_customer_segment', label: 'Primary customer segment', placeholder: 'Type here...' },
       { key: 'geographic_target', label: 'Geographic target', placeholder: 'Type about this...' },
       { key: 'purchasing_behavior', label: 'Customer purchasing behavior', placeholder: 'Type here...' },
-      { key: 'market_size', label: 'Estimated market size', placeholder: 'Type size here...' },
+      { key: 'market_size', label: 'Estimated market size', placeholder: '10M by 2030...' },
     ],
   },
   {
-    id: 5,
+    id: 4,
     title: 'Business Model',
     fields: [
       { key: 'product_type', label: 'Product & Service Type', placeholder: 'Select Product Type' },
       { key: 'planned_price', label: 'Planned price', placeholder: 'Type here...' },
       { key: 'sales_channels', label: 'Sales channels', placeholder: 'About Online/Offline/Vendor...' },
       { key: 'startup_costs', label: 'Startup costs', placeholder: 'Type costs...' },
+      { key: '12-months revenue target', label: '12-Month Revenue Target', placeholder: 'Type revenue target...' },
     ],
   },
   {
-    id: 6,
+    id: 5,
     title: 'Operations & Execution',
     fields: [
       { key: 'startup_requirements', label: 'What is needed to start?', placeholder: 'Like tools, software, skills...' },
@@ -65,7 +58,7 @@ const formSections = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     title: 'Roadmap & Objectives',
     fields: [
       { key: 'goals_30_days', label: '30-Day Goals', placeholder: 'My 30 days goals is...' },
@@ -74,12 +67,24 @@ const formSections = [
     ],
   },
   {
-    id: 8,
+    id: 7,
     title: 'Risks & Compliance',
     fields: [
       { key: 'regulatory_considerations', label: 'Regulatory considerations', placeholder: 'Type...' },
       { key: 'legal_risks', label: 'Legal / ethical risks', placeholder: 'Type...' },
       { key: 'certifications_licenses', label: 'Required certifications / licenses', placeholder: 'Type...' },
+    ],
+  },
+  {
+    id: 8,
+    title: 'Founder identity',
+    fields: [
+      { key: 'business_name', label: 'Business name', placeholder: 'Type business name...' },
+      { key: 'founder_role', label: 'Role In Project', placeholder: 'Select a role' },
+      { key: 'experience_skills', label: 'Main Experience & Skills', placeholder: 'Select skills' },
+      { key: 'Prior Project Experience', label: 'Prior Project Experience'},
+      { key: 'Weekly Time Available', label: 'Weekly Time Available', placeholder: 'Select time available...' },
+      { key: 'Motivation / Vision Statement', label: 'Motivation / Vision Statement', placeholder: 'Type your motivation/vision here...' },
     ],
   },
   {
@@ -205,11 +210,11 @@ export default function CreateProjectPage() {
           </div>
 
           {/* NAVIGATION */}
-          <div className="flex justify-between mt-8">
+          <div className="flex gap-4 mt-4 justify-between mt-8 py-5">
             <button
               disabled={isFirstStep}
               onClick={() => setCurrentStep(s => s - 1)}
-              className="px-4 py-2 border rounded-lg"
+              className="px-4 py-2 border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center"
             >
               <ChevronLeft className="inline w-4 h-4" /> Previous
             </button>
@@ -217,7 +222,7 @@ export default function CreateProjectPage() {
             <button
               disabled={isLastStep}
               onClick={() => setCurrentStep(s => s + 1)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md flex items-center"
             >
               Next <ChevronRight className="inline w-4 h-4" />
             </button>
