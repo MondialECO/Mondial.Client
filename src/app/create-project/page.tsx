@@ -10,7 +10,7 @@ const formSections = [
     id: 1,
     title: 'Concept Overview',
     fields: [
-      { key: 'business_name', label: 'Business Name', placeholder: 'Typing Business Name' },
+      { key: 'name', label: 'Name', placeholder: 'Typing Project Name' },
       { key: 'problem_statement', label: 'Problem Statement', placeholder: 'Write about your problem statement here...' },
       { key: 'target_audience', label: 'Target Audience', placeholder: 'Write about your target audience...' },
       { key: 'existing_solutions', label: 'Existing solutions & limitations', placeholder: 'Write about existing solutions...' },
@@ -20,11 +20,42 @@ const formSections = [
     id: 2,
     title: 'Your Proposed Solution',
     fields: [
-      { key: 'solution_description', label: 'Description of solution', placeholder: 'Describe your solution in short...' },
-      { key: 'stage', label: 'Stage', placeholder: 'Select type' },
-      { key: 'differentiation', label: 'Differentiation from competitors', placeholder: 'Type about this...' },
-      { key: 'client_benefits', label: 'Concrete benefits for clients', placeholder: 'Type benefits here...' },
-      { key: 'long_term_vision', label: 'Long-term vision (3–5 years)', placeholder: 'Type your long-term vision here...' },
+      {
+        key: 'solution_description',
+        label: 'Description of solution',
+        placeholder: 'Describe your solution in short...',
+        type: 'text',
+      },
+      {
+        key: 'stage',
+        label: 'Stage',
+        type: 'select',
+        options: [
+          { label: 'Idea', value: 'idea' },
+          { label: 'MVP', value: 'mvp' },
+          { label: 'Beta', value: 'beta' },
+          { label: 'Live / Launched', value: 'live' },
+          { label: 'Scaling', value: 'scaling' },
+        ],
+      },
+      {
+        key: 'differentiation',
+        label: 'Differentiation from competitors',
+        placeholder: 'Type about this...',
+        type: 'text',
+      },
+      {
+        key: 'client_benefits',
+        label: 'Concrete benefits for clients',
+        placeholder: 'Type benefits here...',
+        type: 'text',
+      },
+      {
+        key: 'long_term_vision',
+        label: 'Long-term vision (3–5 years)',
+        placeholder: 'Type your long-term vision here...',
+        type: 'text',
+      },
     ],
   },
   {
@@ -32,7 +63,7 @@ const formSections = [
     title: 'Market Analysis & Customer insights',
     fields: [
       { key: 'primary_customer_segment', label: 'Primary customer segment', placeholder: 'Type here...' },
-      { key: 'geographic_target', label: 'Geographic target', placeholder: 'Type about this...' },
+      { key: 'geographic_target', label: 'Geographic target', placeholder: 'Type Country/Region...' },
       { key: 'purchasing_behavior', label: 'Customer purchasing behavior', placeholder: 'Type here...' },
       { key: 'market_size', label: 'Estimated market size', placeholder: '10M by 2030...' },
     ],
@@ -41,11 +72,17 @@ const formSections = [
     id: 4,
     title: 'Business Model',
     fields: [
-      { key: 'product_type', label: 'Product & Service Type', placeholder: 'Select Product Type' },
+      { key: 'product_type', label: 'Product & Service Type', type: 'select',
+        options: [
+          { label: 'Product', value: 'product' },
+          { label: 'Service', value: 'service' },
+          { label: 'Product & Service', value: 'product & service' },
+        ],
+       },
       { key: 'planned_price', label: 'Planned price', placeholder: 'Type here...' },
       { key: 'sales_channels', label: 'Sales channels', placeholder: 'About Online/Offline/Vendor...' },
       { key: 'startup_costs', label: 'Startup costs', placeholder: 'Type costs...' },
-      { key: '12-months revenue target', label: '12-Month Revenue Target', placeholder: 'Type revenue target...' },
+      { key: '12_months_revenue_target', label: '12-Month Revenue Target', placeholder: 'Type revenue target...' },
     ],
   },
   {
@@ -53,7 +90,12 @@ const formSections = [
     title: 'Operations & Execution',
     fields: [
       { key: 'startup_requirements', label: 'What is needed to start?', placeholder: 'Like tools, software, skills...' },
-      { key: 'prototype_status', label: 'Prototype status', placeholder: 'Select Status' },
+      { key: 'prototype_status', label: 'Prototype status', type: 'select',
+        options: [
+          { label: 'I Have', value: 'I Have' },
+          { label: 'Haven’t', value: 'Haven’t' },
+        ], 
+      },
       { key: 'main_risks', label: 'Main risks identified', placeholder: 'type here...' },
     ],
   },
@@ -80,11 +122,18 @@ const formSections = [
     title: 'Founder identity',
     fields: [
       { key: 'business_name', label: 'Business name', placeholder: 'Type business name...' },
-      { key: 'founder_role', label: 'Role In Project', placeholder: 'Select a role' },
+      { key: 'founder_role', label: 'Role In Project', placeholder: 'Type a role' },
       { key: 'experience_skills', label: 'Main Experience & Skills', placeholder: 'Select skills' },
-      { key: 'Prior Project Experience', label: 'Prior Project Experience'},
-      { key: 'Weekly Time Available', label: 'Weekly Time Available', placeholder: 'Select time available...' },
-      { key: 'Motivation / Vision Statement', label: 'Motivation / Vision Statement', placeholder: 'Type your motivation/vision here...' },
+      { key: 'Prior_Project_Experience', label: 'Prior Project Experience',},
+      { key: 'Weekly_Time_Available', label: 'Weekly Time Available', type: 'select',
+        options: [
+          { label: '< 5 hours', value: 'less_than_5_hours' },
+          { label: '5-10 hours', value: '5_to_10_hours' },
+          { label: '10-20 hours', value: '10_to_20_hours' },
+          { label: '20+ hours', value: 'more_than_20_hours' },
+        ], 
+      },
+      { key: 'Motivation_Vision_Statement', label: 'Motivation / Vision Statement', placeholder: 'Type your motivation/vision here...' },
     ],
   },
   {
@@ -93,6 +142,8 @@ const formSections = [
     fields: [
       { key: 'amount_required', label: 'Amount Required', placeholder: '$ 1200.00' },
       { key: 'equity_percentage', label: 'Equity Share Percentage', placeholder: '0.00%' },
+      // { key: 'uploaded_images', label: 'Uploaded Images or Videos', type: 'file', multiple: true },
+      // { key: 'uploaded_files', label: 'Uploaded Files', type: 'file', multiple: true },
     ],
   },
 ];
@@ -143,13 +194,13 @@ export default function CreateProjectPage() {
                   <div className="text-sm font-semibold">{section.title}</div>
                     <div className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
                       {section.id === 1 && "Explain your core concept"}
-                      {section.id === 2 && "Introduce the founder"}
-                      {section.id === 3 && "Outline your solution"}
-                      {section.id === 4 && "Analyze target market"}
-                      {section.id === 5 && "Describe revenue model"}
-                      {section.id === 6 && "Detail your execution"}
-                      {section.id === 7 && "Lay out your timeline"}
-                      {section.id === 8 && "Identify potential risks"}
+                      {section.id === 2 && "Outline your solution"}
+                      {section.id === 3 && "Analyze target market"}
+                      {section.id === 4 && "Describe revenue model"}
+                      {section.id === 5 && "Detail your execution"}
+                      {section.id === 6 && "Lay out your timeline"}
+                      {section.id === 7 && "Identify potential risks"}
+                      {section.id === 8 && "Introduce the founder"}
                       {section.id === 9 && "Add equity, image, and docs"}
                     </div>
                 </div>
@@ -160,10 +211,8 @@ export default function CreateProjectPage() {
       </aside>
 
       {/* RIGHT CONTENT (2/3) */}
-      <main className="lg:col-span-2 p-8 h-screen overflow-y-auto flex justify-center">
-        <div className="w-full max-w-4xl bg-white dark:bg-slate-900 
-          rounded-xl border border-slate-200 dark:border-slate-800 
-          shadow-sm p-8">
+      <main className="lg:col-span-2 p-8 h-screen bg-white dark:bg-slate-900 overflow-y-auto flex justify-center">
+        <div className="w-full max-w-4xl p-8">
 
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
             {currentSection.title}
@@ -175,17 +224,38 @@ export default function CreateProjectPage() {
                 <label className="text-sm font-semibold block mb-1">
                   {field.label}
                 </label>
-                <input
-                  type="text"
-                  value={formData[field.key] || ''}
-                  onChange={e =>
-                    setFormData({ ...formData, [field.key]: e.target.value })
-                  }
-                  placeholder={field.placeholder}
-                  className="w-full px-4 py-3 rounded-lg border 
-                    bg-slate-50 dark:bg-slate-800
-                    border-slate-200 dark:border-slate-700"
-                />
+
+                {field.type === 'select' ? (
+                  <select
+                    value={formData[field.key] || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [field.key]: e.target.value })
+                    }
+                    className="rounded-lg border border-slate-300 dark:border-slate-700
+                              bg-white dark:bg-slate-900 px-4 py-2 text-sm
+                              focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">Select stage</option>
+
+                    {field.options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder={field.placeholder}
+                    value={formData[field.key] || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [field.key]: e.target.value })
+                    }
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                              bg-white dark:bg-slate-900 px-4 py-2 text-sm
+                              focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                )}
               </div>
             ))}
 
@@ -194,7 +264,11 @@ export default function CreateProjectPage() {
                 <label className="font-semibold block mb-2">
                   Upload documents
                 </label>
-                <input
+                <input className="border border-slate-300 dark:border-slate-700
+                  rounded-lg px-4 py-2 text-sm w-full
+                  bg-white dark:bg-slate-900
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500
+                  cursor-pointer"
                   type="file"
                   multiple
                   onChange={e => e.target.files && setUploadedFiles([...e.target.files])}
