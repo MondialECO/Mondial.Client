@@ -153,11 +153,32 @@ export default function CreateProjectPage() {
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
+  const [uploadedDocs, setUploadedDocs] = useState<File[]>([]);
+
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+
+  const handleFiles = (
+    files: FileList | null,
+    setter: React.Dispatch<React.SetStateAction<File[]>>
+  ) => {
+    if (!files) return;
+    setter(prev => [...prev, ...Array.from(files)]);
+  };
+
+  const removeFile = (
+    index: number,
+    setter: React.Dispatch<React.SetStateAction<File[]>>
+  ) => {
+    setter(prev => prev.filter((_, i) => i !== index));
+  };
+
+
 
   if (!mounted) return null;
 
@@ -259,7 +280,7 @@ export default function CreateProjectPage() {
               </div>
             ))}
 
-            {isLastStep && (
+            {/* {isLastStep && (
               <div>
                 <label className="font-semibold block mb-2">
                   Upload documents
@@ -280,7 +301,89 @@ export default function CreateProjectPage() {
                   </div>
                 ))}
               </div>
+            )} */}
+            {isLastStep && (
+  <div className="space-y-6">
+
+    {/* IMAGES + VIDEOS (ONE INPUT) */}
+    <div>
+      <label className="font-semibold block mb-2">
+        Upload Images & Videos
+      </label>
+
+      <input
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        onChange={(e) => handleFiles(e.target.files, setUploadedMedia)}
+        className="w-full border border-slate-300 dark:border-slate-700
+                   rounded-lg px-4 py-2 text-sm
+                   bg-white dark:bg-slate-900"
+      />
+
+      {/* PREVIEW */}
+      <div className="grid grid-cols-3 gap-3 mt-3">
+        {uploadedMedia.map((file, i) => (
+          <div key={i} className="relative">
+            {file.type.startsWith('image') ? (
+              <img
+                src={URL.createObjectURL(file)}
+                className="h-24 w-full object-cover rounded-lg"
+              />
+            ) : (
+              <video
+                src={URL.createObjectURL(file)}
+                className="h-24 w-full object-cover rounded-lg"
+                controls
+              />
             )}
+
+            <button
+              onClick={() => removeFile(i, setUploadedMedia)}
+              className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 rounded"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* DOCUMENTS */}
+    <div>
+      <label className="font-semibold block mb-2">
+        Upload Documents (PDF, DOCX, PPT)
+      </label>
+
+      <input
+        type="file"
+        accept=".pdf,.doc,.docx,.ppt,.pptx"
+        multiple
+        onChange={(e) => handleFiles(e.target.files, setUploadedDocs)}
+        className="w-full border border-slate-300 dark:border-slate-700
+                   rounded-lg px-4 py-2 text-sm
+                   bg-white dark:bg-slate-900"
+      />
+
+      <div className="space-y-2 mt-3">
+        {uploadedDocs.map((file, i) => (
+          <div key={i} className="flex justify-between text-sm">
+            📄 {file.name}
+            <button
+              onClick={() => removeFile(i, setUploadedDocs)}
+              className="text-red-500"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+)}
+
+
           </div>
 
           {/* NAVIGATION */}
