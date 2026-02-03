@@ -3,7 +3,14 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Upload, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
-// import { supabase } from '@/lib/supabase';
+import dynamic from 'next/dynamic';
+
+const ReactQuill = dynamic(() => import('react-quill-new'), {
+  ssr: false,                    
+  loading: () => <p>Loading editor...</p>,
+});
+
+import "react-quill-new/dist/quill.snow.css";
 
 const formSections = [
   {
@@ -152,11 +159,12 @@ export default function CreateProjectPage() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  // const [formData, setFormData] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<Record<string, string>>({});
 
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<File[]>([]);
-
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -179,6 +187,23 @@ export default function CreateProjectPage() {
   };
 
 
+
+
+
+
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      ["blockquote", "code-block"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ script: "sub" }, { script: "super" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ color: [] }, { background: [] }],
+      ["link", "image", "video"],
+      ["clean"],
+    ],
+  };
 
   if (!mounted) return null;
 
@@ -241,149 +266,152 @@ export default function CreateProjectPage() {
 
           <div className="space-y-6">
             {currentSection.fields.map(field => (
-              <div key={field.key}>
+              <div key={field.key} className="space-y-2">
                 <label className="text-sm font-semibold block mb-1">
                   {field.label}
                 </label>
 
-                {field.type === 'select' ? (
+                {field.key === 'problem_statement' ||
+                field.key === 'solution_description' ||
+                field.key === 'existing_solutions' ||
+                field.key === 'differentiation' ||
+                field.key === 'client_benefits' ||
+                field.key === 'long_term_vision' ||
+                field.key === 'Motivation_Vision_Statement' ||
+                field.key === 'planned_price' ||
+                field.key === 'sales_channels' ||
+                field.key === '12_months_revenue_target' ||
+                field.key === 'startup_requirements' ||
+                field.key === 'main_risks' ||
+                field.key === 'goals_30_days' ||
+                field.key === 'targets_90_days' ||
+                field.key === 'objectives_12_months' ||
+                field.key === 'regulatory_considerations' ||
+                field.key === 'legal_risks' ||
+                field.key === 'certifications_licenses' ||
+                field.key === 'Prior_Project_Experience'
+                 ? (
+
+                  <div className="border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                    <ReactQuill
+                      theme="snow"
+                      value={formData[field.key] || ''}
+                      onChange={(htmlContent) =>
+                        setFormData({ ...formData, [field.key]: htmlContent })
+                      }
+                      modules={modules}
+                      placeholder={field.placeholder}
+                      className="min-h-[180px]"
+                    />
+                  </div>
+
+                ) : field.type === 'select' ? (
+
                   <select
                     value={formData[field.key] || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [field.key]: e.target.value })
-                    }
-                    className="rounded-lg border border-slate-300 dark:border-slate-700
-                              bg-white dark:bg-slate-900 px-4 py-2 text-sm
-                              focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                    className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="">Select stage</option>
-
+                    <option value="">Select {field.label.toLowerCase()}</option>
                     {field.options?.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     ))}
                   </select>
+
                 ) : (
                   <input
                     type="text"
                     placeholder={field.placeholder}
                     value={formData[field.key] || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [field.key]: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700
-                              bg-white dark:bg-slate-900 px-4 py-2 text-sm
-                              focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 )}
               </div>
             ))}
 
-            {/* {isLastStep && (
-              <div>
-                <label className="font-semibold block mb-2">
-                  Upload documents
-                </label>
-                <input className="border border-slate-300 dark:border-slate-700
-                  rounded-lg px-4 py-2 text-sm w-full
-                  bg-white dark:bg-slate-900
-                  focus:outline-none focus:ring-2 focus:ring-indigo-500
-                  cursor-pointer"
-                  type="file"
-                  multiple
-                  onChange={e => e.target.files && setUploadedFiles([...e.target.files])}
-                />
-
-                {uploadedFiles.map((f, i) => (
-                  <div key={i} className="flex gap-2 mt-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500" /> {f.name}
-                  </div>
-                ))}
-              </div>
-            )} */}
             {isLastStep && (
-  <div className="space-y-6">
+              <div className="space-y-6">
 
-    {/* IMAGES + VIDEOS (ONE INPUT) */}
-    <div>
-      <label className="font-semibold block mb-2">
-        Upload Images & Videos
-      </label>
+                {/* IMAGES + VIDEOS (ONE INPUT) */}
+                <div>
+                  <label className="font-semibold block mb-2">
+                    Upload Images & Videos
+                  </label>
 
-      <input
-        type="file"
-        accept="image/*,video/*"
-        multiple
-        onChange={(e) => handleFiles(e.target.files, setUploadedMedia)}
-        className="w-full border border-slate-300 dark:border-slate-700
-                   rounded-lg px-4 py-2 text-sm
-                   bg-white dark:bg-slate-900"
-      />
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    multiple
+                    onChange={(e) => handleFiles(e.target.files, setUploadedMedia)}
+                    className="w-full border border-slate-300 dark:border-slate-700
+                              rounded-lg px-4 py-2 text-sm
+                              bg-white dark:bg-slate-900"
+                  />
 
-      {/* PREVIEW */}
-      <div className="grid grid-cols-3 gap-3 mt-3">
-        {uploadedMedia.map((file, i) => (
-          <div key={i} className="relative">
-            {file.type.startsWith('image') ? (
-              <img
-                src={URL.createObjectURL(file)}
-                className="h-24 w-full object-cover rounded-lg"
-              />
-            ) : (
-              <video
-                src={URL.createObjectURL(file)}
-                className="h-24 w-full object-cover rounded-lg"
-                controls
-              />
+                  {/* PREVIEW */}
+                  <div className="grid grid-cols-3 gap-3 mt-3">
+                    {uploadedMedia.map((file, i) => (
+                      <div key={i} className="relative">
+                        {file.type.startsWith('image') ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            className="h-24 w-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <video
+                            src={URL.createObjectURL(file)}
+                            className="h-24 w-full object-cover rounded-lg"
+                            controls
+                          />
+                        )}
+
+                        <button
+                          onClick={() => removeFile(i, setUploadedMedia)}
+                          className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 rounded"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DOCUMENTS */}
+                <div>
+                  <label className="font-semibold block mb-2">
+                    Upload Documents (PDF, DOCX, PPT)
+                  </label>
+
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx"
+                    multiple
+                    onChange={(e) => handleFiles(e.target.files, setUploadedDocs)}
+                    className="w-full border border-slate-300 dark:border-slate-700
+                              rounded-lg px-4 py-2 text-sm
+                              bg-white dark:bg-slate-900"
+                  />
+
+                  <div className="space-y-2 mt-3">
+                    {uploadedDocs.map((file, i) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        📄 {file.name}
+                        <button
+                          onClick={() => removeFile(i, setUploadedDocs)}
+                          className="text-red-500"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
             )}
-
-            <button
-              onClick={() => removeFile(i, setUploadedMedia)}
-              className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 rounded"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* DOCUMENTS */}
-    <div>
-      <label className="font-semibold block mb-2">
-        Upload Documents (PDF, DOCX, PPT)
-      </label>
-
-      <input
-        type="file"
-        accept=".pdf,.doc,.docx,.ppt,.pptx"
-        multiple
-        onChange={(e) => handleFiles(e.target.files, setUploadedDocs)}
-        className="w-full border border-slate-300 dark:border-slate-700
-                   rounded-lg px-4 py-2 text-sm
-                   bg-white dark:bg-slate-900"
-      />
-
-      <div className="space-y-2 mt-3">
-        {uploadedDocs.map((file, i) => (
-          <div key={i} className="flex justify-between text-sm">
-            📄 {file.name}
-            <button
-              onClick={() => removeFile(i, setUploadedDocs)}
-              className="text-red-500"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-
-  </div>
-)}
-
-
           </div>
 
           {/* NAVIGATION */}
