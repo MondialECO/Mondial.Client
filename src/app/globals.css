@@ -126,3 +126,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* textarea for html code */
+/* styles/globals.css */
+@layer components {
+  .ql-editor {
+    @apply min-h-[200px] px-4 py-3 text-gray-800;
+  }
+
+  .ql-toolbar {
+    @apply border-b border-gray-300 bg-gray-50;
+  }
+
+  .ql-container {
+    @apply border border-gray-300 rounded-b-lg;
+  }
+
+  .ql-container.ql-snow {
+    @apply border-t-0;
+  }
+}
