@@ -10,6 +10,8 @@ import {
   Lightbulb, 
   DollarSign 
 } from "lucide-react"
+import Link from "next/link";
+
 
 type Project = {
   status: "Approved" | "Pending"
@@ -80,7 +82,9 @@ export default function CreatorDashboard() {
           <h1 className="text-2xl font-bold tracking-tight">Creator Dashboard</h1>
           <p className="text-sm text-muted-foreground">Hello Back, Jona!</p>
         </div>
-        <Button size="sm">+ Create Project</Button>
+        <Button asChild size="sm">
+          <Link href="/create-project">+ Create Project</Link>
+        </Button>
       </div>
 
       {/* Stats Cards - Smaller version */}

@@ -333,77 +333,100 @@ export default function CreateProjectPage() {
             ))}
 
             {isLastStep && (
-              <div className="space-y-6">
-
-                {/* IMAGES + VIDEOS (ONE INPUT) */}
+              <div className="space-y-8">
                 <div>
-                  <label className="font-semibold block mb-2">
-                    Upload Images & Videos
-                  </label>
+                  <h3 className="text-sm font-semibold mb-3">Upload Media</h3>
 
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    onChange={(e) => handleFiles(e.target.files, setUploadedMedia)}
-                    className="w-full border border-slate-300 dark:border-slate-700
-                              rounded-lg px-4 py-2 text-sm
-                              bg-white dark:bg-slate-900"
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                  {/* PREVIEW */}
-                  <div className="grid grid-cols-3 gap-3 mt-3">
+                    {/* MEDIA PREVIEWS */}
                     {uploadedMedia.map((file, i) => (
-                      <div key={i} className="relative">
-                        {file.type.startsWith('image') ? (
+                      <div
+                        key={i}
+                        className="relative rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+                      >
+                        {file.type.startsWith("image") ? (
                           <img
                             src={URL.createObjectURL(file)}
-                            className="h-24 w-full object-cover rounded-lg"
+                            className="h-40 w-full object-cover"
                           />
                         ) : (
                           <video
                             src={URL.createObjectURL(file)}
-                            className="h-24 w-full object-cover rounded-lg"
-                            controls
+                            className="h-40 w-full object-cover"
                           />
                         )}
 
+                        {/* Cover label */}
+                        <span className="absolute bottom-2 left-2 text-xs bg-black/60 text-white px-2 py-0.5 rounded">
+                          Cover
+                        </span>
+
+                        {/* Remove */}
                         <button
                           onClick={() => removeFile(i, setUploadedMedia)}
-                          className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 rounded"
+                          className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded"
                         >
                           ✕
                         </button>
                       </div>
                     ))}
+
+                    {/* UPLOAD BOX */}
+                    <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        multiple
+                        hidden
+                        onChange={(e) =>
+                          handleFiles(e.target.files, setUploadedMedia)
+                        }
+                      />
+                      <span className="text-sm font-medium">Select Image or Video</span>
+                      <span className="text-xs text-muted-foreground">
+                        JPEG, JPG, MP4, 16:9, 30MB
+                      </span>
+                    </label>
+
                   </div>
                 </div>
 
-                {/* DOCUMENTS */}
                 <div>
-                  <label className="font-semibold block mb-2">
-                    Upload Documents (PDF, DOCX, PPT)
+                  <h3 className="text-sm font-semibold mb-3">Document Upload</h3>
+                  {/* DOCUMENT DROP */}
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl py-10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.ppt,.pptx"
+                      multiple
+                      hidden
+                      onChange={(e) =>
+                        handleFiles(e.target.files, setUploadedDocs)
+                      }
+                    />
+                    <span className="text-sm font-medium">
+                      Choose a file & Upload here
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Only Upload PDF, 20MB
+                    </span>
                   </label>
 
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx,.ppt,.pptx"
-                    multiple
-                    onChange={(e) => handleFiles(e.target.files, setUploadedDocs)}
-                    className="w-full border border-slate-300 dark:border-slate-700
-                              rounded-lg px-4 py-2 text-sm
-                              bg-white dark:bg-slate-900"
-                  />
-
-                  <div className="space-y-2 mt-3">
+                  {/* DOCUMENT LIST */}
+                  <div className="mt-4 space-y-2">
                     {uploadedDocs.map((file, i) => (
-                      <div key={i} className="flex justify-between text-sm">
-                        📄 {file.name}
+                      <div
+                        key={i}
+                        className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm"
+                      >
+                        <span>📄 {file.name}</span>
+
                         <button
                           onClick={() => removeFile(i, setUploadedDocs)}
-                          className="text-red-500"
+                          className="text-slate-500 hover:text-red-500"
                         >
-                          Remove
+                          🗑️
                         </button>
                       </div>
                     ))}
@@ -412,6 +435,7 @@ export default function CreateProjectPage() {
 
               </div>
             )}
+
           </div>
 
           {/* NAVIGATION */}

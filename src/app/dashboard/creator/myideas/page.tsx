@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import IdeaCard from "@/components/founder/idea-card"
+import Link from "next/link";
 
 export default function MyIdeasPage() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -102,8 +103,10 @@ export default function MyIdeasPage() {
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white gap-2"
             >
-              <Plus size={18} />
-              Create Idea
+              <Link href="/create-project">
+                {/* <Plus size={18} /> */}
+                + Create Idea
+              </Link>
             </Button>
           </div>
         </div>
