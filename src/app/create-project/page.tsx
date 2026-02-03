@@ -1,10 +1,11 @@
 'use client';
+import { useMemo } from 'react';
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Upload, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
-import { createIdeaApi } from '@/service/creator/dashboard';
+import { saveIdeaDraftApi } from '@/service/creator/dashboard';
 import { CreateIdeaModel } from '@/types/creator/create-idea-model';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
@@ -188,39 +189,36 @@ export default function CreateProjectPage() {
     setter(prev => prev.filter((_, i) => i !== index));
   };
 
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      ["blockquote", "code-block"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ script: "sub" }, { script: "super" }],
-      [{ indent: "-1" }, { indent: "+1" }],
-      [{ color: [] }, { background: [] }],
-      ["link", "image", "video"],
-      ["clean"],
-    ],
-  };
+  // const modules = {
+  //   toolbar: [
+  //     [{ header: [1, 2, 3, false] }],
+  //     ["bold", "italic", "underline", "strike"],
+  //     ["blockquote", "code-block"],
+  //     [{ list: "ordered" }, { list: "bullet" }],
+  //     [{ script: "sub" }, { script: "super" }],
+  //     [{ indent: "-1" }, { indent: "+1" }],
+  //     [{ color: [] }, { background: [] }],
+  //     ["link", "image", "video"],
+  //     ["clean"],
+  //   ],
+  // };
 
+  const modules = useMemo(() => ({
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ["bold", "italic", "underline", "strike"],
+    ["blockquote", "code-block"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ script: "sub" }, { script: "super" }],
+    [{ indent: "-1" }, { indent: "+1" }],
+    [{ color: [] }, { background: [] }],
+    ["link", "image", "video"],
+    ["clean"],
+  ],
+}), []);
 
-    const handleSubmit = async () => {
-    const payload: CreateIdeaModel = {
-      ...formData,
-
-      revenue_12_months: formData['12_months_revenue_target'],
-      prior_project_experience: formData['Prior_Project_Experience'],
-      motivation_vision_statement: formData['Motivation_Vision_Statement'],
-
-      amount_required: Number(formData.amount_required),
-      equity_percentage: Number(formData.equity_percentage),
-
-      media: uploadedMedia,
-      documents: uploadedDocs,
-    } as CreateIdeaModel;
-
-    await createIdeaApi(payload);
-  };
-
+// extra protection to avoid multiple clicks
+  if (isSaving) return;
 
   const handleNext = async () => {
   setIsSaving(true);
@@ -256,9 +254,25 @@ export default function CreateProjectPage() {
 const handleFinalSubmit = async () => {
   if (!ideaId) return;
 
-  await axios.post('/creator/idea/submit', {
+  const res = await saveIdeaDraftApi({
     id: ideaId,
-  });
+    status: 'SUBMITTED',
+    ...formData,
+
+    revenue_12_months: formData['12_months_revenue_target'],
+    prior_project_experience: formData['Prior_Project_Experience'],
+    motivation_vision_statement: formData['Motivation_Vision_Statement'],
+    amount_required: Number(formData.amount_required),
+    equity_percentage: Number(formData.equity_percentage),
+    media: uploadedMedia,
+    documents: uploadedDocs,
+  } as CreateIdeaModel);
+
+  if (res.success) {
+    alert('Idea submitted successfully!');
+  } else {
+    alert('Error submitting idea: ' + res.message);
+  }
 
   // redirect / success toast
 };

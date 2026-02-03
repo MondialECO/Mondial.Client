@@ -2,7 +2,6 @@
 import axios from '@/lib/axios';
 import { CreateIdeaModel } from '@/types/creator/create-idea-model';
 
-
 export const saveIdeaDraftApi = async (model: CreateIdeaModel) => {
   const formData = new FormData();
 
@@ -20,22 +19,30 @@ export const saveIdeaDraftApi = async (model: CreateIdeaModel) => {
   model.media?.forEach(file => formData.append('media', file));
   model.documents?.forEach(file => formData.append('documents', file));
 
-  const res = axios.post(
-    `/creator/new-idea/${ideaId ?? ''}`,
+  const res = await axios.post(
+    `/creator/new-idea/${model.id ?? ''}`,
     formData,
     {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     }
-    );
+  );
+
+  return res.data as {
+    success: boolean;
+    message: string;
+    id: string;
+  };
 };
+
 
 export const getIdeaDraftApi = async (id: string) => {
   const res = await axios.get(`/creator/idea/draft/${id}`);
   return res.data as CreateIdeaModel;
 };
 
+
 export const submitIdeaApi = async (id: string) => {
-  const res = await axios.post(`/creator/idea/submit/${id}`);
+  const res = await axios.post(`/creator/idea/submit`, { id });
   return res.data;
 };
 
