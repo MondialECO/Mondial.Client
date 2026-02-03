@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
-  // ✅ SAFE hydration
+  // SAFE hydration
   useEffect(() => {
     if (typeof window === "undefined") return;
 

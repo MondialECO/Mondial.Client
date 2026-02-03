@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Upload, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
+import { createIdeaApi } from '@/service/creator/dashboard';
+import { CreateIdeaModel } from '@/types/creator/create-idea-model';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,                    
@@ -149,8 +151,6 @@ const formSections = [
     fields: [
       { key: 'amount_required', label: 'Amount Required', placeholder: '$ 1200.00' },
       { key: 'equity_percentage', label: 'Equity Share Percentage', placeholder: '0.00%' },
-      // { key: 'uploaded_images', label: 'Uploaded Images or Videos', type: 'file', multiple: true },
-      // { key: 'uploaded_files', label: 'Uploaded Files', type: 'file', multiple: true },
     ],
   },
 ];
@@ -161,6 +161,8 @@ export default function CreateProjectPage() {
   const [currentStep, setCurrentStep] = useState(0);
   // const [formData, setFormData] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [ideaId, setIdeaId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<File[]>([]);
@@ -186,11 +188,6 @@ export default function CreateProjectPage() {
     setter(prev => prev.filter((_, i) => i !== index));
   };
 
-
-
-
-
-
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -205,7 +202,82 @@ export default function CreateProjectPage() {
     ],
   };
 
+
+    const handleSubmit = async () => {
+    const payload: CreateIdeaModel = {
+      ...formData,
+
+      revenue_12_months: formData['12_months_revenue_target'],
+      prior_project_experience: formData['Prior_Project_Experience'],
+      motivation_vision_statement: formData['Motivation_Vision_Statement'],
+
+      amount_required: Number(formData.amount_required),
+      equity_percentage: Number(formData.equity_percentage),
+
+      media: uploadedMedia,
+      documents: uploadedDocs,
+    } as CreateIdeaModel;
+
+    await createIdeaApi(payload);
+  };
+
+
+  const handleNext = async () => {
+  setIsSaving(true);
+
+  const payload: CreateIdeaModel = {
+    id: ideaId,
+    status: 'DRAFT',
+
+    ...formData,
+
+    revenue_12_months: formData['12_months_revenue_target'],
+    prior_project_experience: formData['Prior_Project_Experience'],
+    motivation_vision_statement: formData['Motivation_Vision_Statement'],
+
+    amount_required: Number(formData.amount_required),
+    equity_percentage: Number(formData.equity_percentage),
+
+    media: uploadedMedia,
+    documents: uploadedDocs,
+  } as CreateIdeaModel;
+
+  const res = await saveIdeaDraftApi(payload);
+
+  // First time only
+  if (!ideaId && res?.id) {
+    setIdeaId(res.id);
+  }
+
+  setCurrentStep(s => s + 1);
+  setIsSaving(false);
+};
+
+const handleFinalSubmit = async () => {
+  if (!ideaId) return;
+
+  await axios.post('/creator/idea/submit', {
+    id: ideaId,
+  });
+
+  // redirect / success toast
+};
+
+
+
+
+
+
+
+
+
+
+
   if (!mounted) return null;
+
+
+
+
 
   const currentSection = formSections[currentStep];
   const isFirstStep = currentStep === 0;
@@ -448,13 +520,33 @@ export default function CreateProjectPage() {
               <ChevronLeft className="inline w-4 h-4" /> Previous
             </button>
 
-            <button
+            {isLastStep ? (
+              <button
+                onClick={handleFinalSubmit}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg"
+              >
+                <Check className="w-4 h-4" /> Submit Idea
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                disabled={isSaving}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              >
+                {isSaving ? 'Saving...' : 'Next'}
+              </button>
+            )}
+
+
+            {/* <button
               disabled={isLastStep}
               onClick={() => setCurrentStep(s => s + 1)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md flex items-center"
             >
               Next <ChevronRight className="inline w-4 h-4" />
-            </button>
+            </button> */}
+     
+
           </div>
         </div>
       </main>
