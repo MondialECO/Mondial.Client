@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://api.mondialbusiness.eu/api",
+  // baseURL: "https://api.mondialbusiness.eu/api",
+  baseURL: "https://localhost:7264/api",
 });
 
 api.interceptors.request.use((config) => {
