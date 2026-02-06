@@ -1,12 +1,11 @@
 'use client';
-import { useMemo } from 'react';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect,  useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Upload, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
 import { saveIdeaDraftApi } from '@/service/creator/dashboard';
-import { CreateIdeaModel } from '@/types/creator/create-idea-model';
+import { CreateIdeaModel, IdeaFormState, IdeaStatus } from '@/types/creator/create-idea-model';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,                    
@@ -15,287 +14,469 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
 
 import "react-quill-new/dist/quill.snow.css";
 
+// Field Type Definition (this solves all the type errors)
+type FormField =
+  | {
+      key: string;
+      label: string;
+      placeholder?: string;
+      isRichText?: true;
+    }
+  | {
+      key: string;
+      label: string;
+      type: 'select';
+      options: Array<{ label: string; value: string }>;
+    }
+  | {
+      key: string;
+      label: string;
+      type: 'number';
+      placeholder?: string;
+    };
+
+// Section type
+type FormSection = {
+  id: number;
+  title: string;
+  fields: FormField[];
+};
+
+
 const formSections = [
   {
     id: 1,
     title: 'Concept Overview',
     fields: [
-      { key: 'name', label: 'Name', placeholder: 'Typing Project Name' },
-      { key: 'problem_statement', label: 'Problem Statement', placeholder: 'Write about your problem statement here...' },
-      { key: 'target_audience', label: 'Target Audience', placeholder: 'Write about your target audience...' },
-      { key: 'existing_solutions', label: 'Existing solutions & limitations', placeholder: 'Write about existing solutions...' },
+      {
+        key: 'name',
+        label: 'Project / Idea Name',
+        placeholder: 'e.g. EcoTrack – Carbon Footprint Tracker',
+      },
+      {
+        key: 'problem_statement',
+        label: 'Problem Statement',
+        placeholder: 'Describe the problem your idea solves...',
+        isRichText: true,
+      },
+      {
+        key: 'target_audience',
+        label: 'Target Audience',
+        placeholder: 'Who will use this product/service? (age, profession, needs...)',
+        isRichText: true,
+      },
+      {
+        key: 'existing_solutions',
+        label: 'Existing Solutions & Their Limitations',
+        placeholder: 'What solutions already exist? Why are they not good enough?',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 2,
     title: 'Your Proposed Solution',
     fields: [
       {
         key: 'solution_description',
-        label: 'Description of solution',
-        placeholder: 'Describe your solution in short...',
-        type: 'text',
+        label: 'Description of Your Solution',
+        placeholder: 'Explain how your product/service works...',
+        isRichText: true,
       },
       {
         key: 'stage',
-        label: 'Stage',
+        label: 'Current Stage',
         type: 'select',
         options: [
-          { label: 'Idea', value: 'idea' },
-          { label: 'MVP', value: 'mvp' },
-          { label: 'Beta', value: 'beta' },
+          { label: 'Idea (concept only)', value: 'idea' },
+          { label: 'MVP (minimum viable product)', value: 'mvp' },
+          { label: 'Beta (testing with real users)', value: 'beta' },
           { label: 'Live / Launched', value: 'live' },
-          { label: 'Scaling', value: 'scaling' },
+          { label: 'Scaling (growing users/revenue)', value: 'scaling' },
         ],
       },
       {
         key: 'differentiation',
-        label: 'Differentiation from competitors',
-        placeholder: 'Type about this...',
-        type: 'text',
+        label: 'What makes your solution different / better?',
+        placeholder: 'Unique features, better price, better UX, new technology...',
+        isRichText: true,
       },
       {
         key: 'client_benefits',
-        label: 'Concrete benefits for clients',
-        placeholder: 'Type benefits here...',
-        type: 'text',
+        label: 'Concrete Benefits for Users/Customers',
+        placeholder: 'Save time, save money, better health, more fun...',
+        isRichText: true,
       },
       {
         key: 'long_term_vision',
-        label: 'Long-term vision (3–5 years)',
-        placeholder: 'Type your long-term vision here...',
-        type: 'text',
+        label: 'Long-term Vision (3–5 years)',
+        placeholder: 'Where do you see this project in 3–5 years?',
+        isRichText: true,
       },
     ],
   },
+
   {
     id: 3,
-    title: 'Market Analysis & Customer insights',
+    title: 'Market Analysis & Customer Insights',
     fields: [
-      { key: 'primary_customer_segment', label: 'Primary customer segment', placeholder: 'Type here...' },
-      { key: 'geographic_target', label: 'Geographic target', placeholder: 'Type Country/Region...' },
-      { key: 'purchasing_behavior', label: 'Customer purchasing behavior', placeholder: 'Type here...' },
-      { key: 'market_size', label: 'Estimated market size', placeholder: '10M by 2030...' },
+      {
+        key: 'primary_customer_segment',
+        label: 'Primary Customer Segment',
+        placeholder: 'e.g. Working parents 25–40 years old, small e-commerce businesses...',
+        isRichText: true,
+      },
+      {
+        key: 'geographic_target',
+        label: 'Geographic Target',
+        placeholder: 'e.g. Bangladesh, South Asia, Global...',
+        isRichText: true,
+      },
+      {
+        key: 'purchasing_behavior',
+        label: 'Customer Purchasing Behavior',
+        placeholder: 'How do they usually buy similar products? Online / offline / subscription...',
+        isRichText: true,
+      },
+      {
+        key: 'market_size',
+        label: 'Estimated Market Size',
+        placeholder: 'e.g. $2.5B globally by 2030, 1.2M potential users in BD...',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 4,
     title: 'Business Model',
     fields: [
-      { key: 'product_type', label: 'Product & Service Type', type: 'select',
+      {
+        key: 'product_type',
+        label: 'Product Type',
+        type: 'select',
         options: [
-          { label: 'Product', value: 'product' },
+          { label: 'Product (physical/digital)', value: 'product' },
           { label: 'Service', value: 'service' },
-          { label: 'Product & Service', value: 'product & service' },
+          { label: 'Product + Service', value: 'product & service' },
         ],
-       },
-      { key: 'planned_price', label: 'Planned price', placeholder: 'Type here...' },
-      { key: 'sales_channels', label: 'Sales channels', placeholder: 'About Online/Offline/Vendor...' },
-      { key: 'startup_costs', label: 'Startup costs', placeholder: 'Type costs...' },
-      { key: '12_months_revenue_target', label: '12-Month Revenue Target', placeholder: 'Type revenue target...' },
+      },
+      {
+        key: 'planned_price',
+        label: 'Planned Price / Pricing Model',
+        placeholder: 'e.g. $9/month, $49 one-time, freemium...',
+        isRichText: true,
+      },
+      {
+        key: 'sales_channels',
+        label: 'Main Sales Channels',
+        placeholder: 'e.g. Website, App Store, Facebook/Instagram ads, local partners...',
+        isRichText: true,
+      },
+      {
+        key: 'startup_costs',
+        label: 'Estimated Startup Costs',
+        placeholder: 'e.g. $1,500 – $4,000 (development, marketing, legal...)',
+        isRichText: true,
+      },
+      {
+        key: 'revenue_12_months',
+        label: '12-Month Revenue Target',
+        placeholder: 'e.g. $30,000 – $80,000',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 5,
     title: 'Operations & Execution',
     fields: [
-      { key: 'startup_requirements', label: 'What is needed to start?', placeholder: 'Like tools, software, skills...' },
-      { key: 'prototype_status', label: 'Prototype status', type: 'select',
-        options: [
-          { label: 'I Have', value: 'I Have' },
-          { label: 'Haven’t', value: 'Haven’t' },
-        ], 
+      {
+        key: 'startup_requirements',
+        label: 'What do you need to start?',
+        placeholder: 'Tools, software, team members, skills, budget...',
+        isRichText: true,
       },
-      { key: 'main_risks', label: 'Main risks identified', placeholder: 'type here...' },
+      {
+        key: 'prototype_status',
+        label: 'Do you already have a prototype?',
+        type: 'select',
+        options: [
+          { label: 'Yes, I have a prototype', value: 'I Have' },
+          { label: 'No, not yet', value: 'Haven’t' },
+        ],
+      },
+      {
+        key: 'main_risks',
+        label: 'Main Risks & Challenges',
+        placeholder: 'Technical, market, competition, legal, financial...',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 6,
     title: 'Roadmap & Objectives',
     fields: [
-      { key: 'goals_30_days', label: '30-Day Goals', placeholder: 'My 30 days goals is...' },
-      { key: 'targets_90_days', label: '90-Day targets', placeholder: '90 days targets is...' },
-      { key: 'objectives_12_months', label: '12-Month Objectives', placeholder: '12 month objectives...' },
+      {
+        key: 'goals_30_days',
+        label: 'Next 30 Days Goals',
+        placeholder: 'What do you want to achieve in the next month?',
+        isRichText: true,
+      },
+      {
+        key: 'targets_90_days',
+        label: '90-Day Targets',
+        placeholder: 'Key milestones for the next 3 months...',
+        isRichText: true,
+      },
+      {
+        key: 'objectives_12_months',
+        label: '12-Month Objectives',
+        placeholder: 'Main goals for the first year...',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 7,
     title: 'Risks & Compliance',
     fields: [
-      { key: 'regulatory_considerations', label: 'Regulatory considerations', placeholder: 'Type...' },
-      { key: 'legal_risks', label: 'Legal / ethical risks', placeholder: 'Type...' },
-      { key: 'certifications_licenses', label: 'Required certifications / licenses', placeholder: 'Type...' },
+      {
+        key: 'regulatory_considerations',
+        label: 'Regulatory / Compliance Considerations',
+        placeholder: 'Any laws, licenses, data privacy rules (GDPR, etc.)...',
+        isRichText: true,
+      },
+      {
+        key: 'legal_risks',
+        label: 'Legal or Ethical Risks',
+        placeholder: 'Potential lawsuits, IP issues, ethical concerns...',
+        isRichText: true,
+      },
+      {
+        key: 'certifications_licenses',
+        label: 'Required Certifications or Licenses',
+        placeholder: 'e.g. Food safety, medical device cert, business license...',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 8,
-    title: 'Founder identity',
+    title: 'Founder & Team',
     fields: [
-      { key: 'business_name', label: 'Business name', placeholder: 'Type business name...' },
-      { key: 'founder_role', label: 'Role In Project', placeholder: 'Type a role' },
-      { key: 'experience_skills', label: 'Main Experience & Skills', placeholder: 'Select skills' },
-      { key: 'Prior_Project_Experience', label: 'Prior Project Experience',},
-      { key: 'Weekly_Time_Available', label: 'Weekly Time Available', type: 'select',
-        options: [
-          { label: '< 5 hours', value: 'less_than_5_hours' },
-          { label: '5-10 hours', value: '5_to_10_hours' },
-          { label: '10-20 hours', value: '10_to_20_hours' },
-          { label: '20+ hours', value: 'more_than_20_hours' },
-        ], 
+      {
+        key: 'business_name',
+        label: 'Business / Brand Name',
+        placeholder: 'Official or working name of the business',
       },
-      { key: 'Motivation_Vision_Statement', label: 'Motivation / Vision Statement', placeholder: 'Type your motivation/vision here...' },
+      {
+        key: 'founder_role',
+        label: 'Your Role in the Project',
+        placeholder: 'e.g. Founder & CEO, Tech Lead, Product Designer...',
+      },
+      {
+        key: 'experience_skills',
+        label: 'Your Main Experience & Skills',
+        placeholder: 'Relevant experience, skills, previous projects...',
+        isRichText: true,
+      },
+      {
+        key: 'prior_project_experience',
+        label: 'Prior Project / Startup Experience',
+        placeholder: 'Have you built anything before? What happened to it?',
+        isRichText: true,
+      },
+      {
+        key: 'weekly_time_available',
+        label: 'Weekly Time Available',
+        type: 'select',
+        options: [
+          { label: 'Less than 5 hours', value: 'less_than_5_hours' },
+          { label: '5–10 hours', value: '5_to_10_hours' },
+          { label: '10–20 hours', value: '10_to_20_hours' },
+          { label: 'More than 20 hours', value: 'more_than_20_hours' },
+        ],
+      },
+      {
+        key: 'motivation_vision_statement',
+        label: 'Motivation & Personal Vision',
+        placeholder: 'Why are you passionate about this idea?',
+        isRichText: true,
+      },
     ],
   },
+
   {
     id: 9,
-    title: 'Equity details, image, and document',
+    title: 'Funding & Media',
     fields: [
-      { key: 'amount_required', label: 'Amount Required', placeholder: '$ 1200.00' },
-      { key: 'equity_percentage', label: 'Equity Share Percentage', placeholder: '0.00%' },
+      {
+        key: 'amount_required',
+        label: 'Funding Amount Required (USD)',
+        type: 'number',
+        placeholder: 'e.g. 5000',
+      },
+      {
+        key: 'equity_percentage',
+        label: 'Equity Offered (%)',
+        type: 'number',
+        placeholder: 'e.g. 12.5',
+      },
     ],
   },
-];
+] as const;
 
 export default function CreateProjectPage() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  // const [formData, setFormData] = useState<Record<string, string>>({});
-  const [formData, setFormData] = useState<Record<string, string>>({});
+  // const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Partial<IdeaFormState>>({});
+
   const [ideaId, setIdeaId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<File[]>([]);
-  const [content, setContent] = useState("");
+  // const [content, setContent] = useState("");
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-
-  const handleFiles = (
-    files: FileList | null,
-    setter: React.Dispatch<React.SetStateAction<File[]>>
-  ) => {
-    if (!files) return;
-    setter(prev => [...prev, ...Array.from(files)]);
-  };
-
-  const removeFile = (
-    index: number,
-    setter: React.Dispatch<React.SetStateAction<File[]>>
-  ) => {
-    setter(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // const modules = {
-  //   toolbar: [
-  //     [{ header: [1, 2, 3, false] }],
-  //     ["bold", "italic", "underline", "strike"],
-  //     ["blockquote", "code-block"],
-  //     [{ list: "ordered" }, { list: "bullet" }],
-  //     [{ script: "sub" }, { script: "super" }],
-  //     [{ indent: "-1" }, { indent: "+1" }],
-  //     [{ color: [] }, { background: [] }],
-  //     ["link", "image", "video"],
-  //     ["clean"],
-  //   ],
-  // };
-
   const modules = useMemo(() => ({
-  toolbar: [
-    [{ header: [1, 2, 3, false] }],
-    ["bold", "italic", "underline", "strike"],
-    ["blockquote", "code-block"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ script: "sub" }, { script: "super" }],
-    [{ indent: "-1" }, { indent: "+1" }],
-    [{ color: [] }, { background: [] }],
-    ["link", "image", "video"],
-    ["clean"],
-  ],
-}), []);
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      ["blockquote", "code-block"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ script: "sub" }, { script: "super" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ color: [] }, { background: [] }],
+      ["link", "image", "video"],
+      ["clean"],
+    ],
+  }), []);
 
-// extra protection to avoid multiple clicks
-  if (isSaving) return;
+  // ─── Build payload that matches CreateIdeaModel ───────────────────────
+  const buildPayload = (overrideStatus?: IdeaStatus): CreateIdeaModel => ({
+    id: ideaId ?? undefined,
+    status: overrideStatus || 'DRAFT',
 
+    name: formData.name || '',
+    problem_statement: formData.problem_statement || '',
+    target_audience: formData.target_audience || '',
+    existing_solutions: formData.existing_solutions || '',
+
+    solution_description: formData.solution_description || '',
+    stage: (formData.stage as any) || '',
+    differentiation: formData.differentiation || '',
+    client_benefits: formData.client_benefits || '',
+    long_term_vision: formData.long_term_vision || '',
+
+    primary_customer_segment: formData.primary_customer_segment || '',
+    geographic_target: formData.geographic_target || '',
+    purchasing_behavior: formData.purchasing_behavior || '',
+    market_size: formData.market_size || '',
+
+    product_type: (formData.product_type as any) || '',
+    planned_price: formData.planned_price || '',
+    sales_channels: formData.sales_channels || '',
+    startup_costs: formData.startup_costs || '',
+    revenue_12_months: formData.revenue_12_months || '',
+
+    startup_requirements: formData.startup_requirements || '',
+    prototype_status: (formData.prototype_status as any) || '',
+    main_risks: formData.main_risks || '',
+
+    goals_30_days: formData.goals_30_days || '',
+    targets_90_days: formData.targets_90_days || '',
+    objectives_12_months: formData.objectives_12_months || '',
+
+    regulatory_considerations: formData.regulatory_considerations || '',
+    legal_risks: formData.legal_risks || '',
+    certifications_licenses: formData.certifications_licenses || '',
+
+    business_name: formData.business_name || '',
+    founder_role: formData.founder_role || '',
+    experience_skills: formData.experience_skills || '',
+    prior_project_experience: formData.prior_project_experience || '',
+    weekly_time_available: (formData.weekly_time_available as any) || '',
+    motivation_vision_statement: formData.motivation_vision_statement || '',
+
+    amount_required: Number(formData.amount_required) || 0,
+    equity_percentage: Number(formData.equity_percentage) || 0,
+
+    media: uploadedMedia,
+    documents: uploadedDocs,
+  });
+
+  const saveDraft = async (status: IdeaStatus = 'DRAFT') => {
+    if (isSaving) return;
+    setIsSaving(true);
+
+    try {
+      const payload = buildPayload(status);
+      const res = await saveIdeaDraftApi(payload);
+
+      if (res.success && res.id && !ideaId) {
+        setIdeaId(res.id);
+      }
+
+      return res;
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Failed to save. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+ 
   const handleNext = async () => {
-  setIsSaving(true);
-
-  const payload: CreateIdeaModel = {
-    id: ideaId,
-    status: 'DRAFT',
-
-    ...formData,
-
-    revenue_12_months: formData['12_months_revenue_target'],
-    prior_project_experience: formData['Prior_Project_Experience'],
-    motivation_vision_statement: formData['Motivation_Vision_Statement'],
-
-    amount_required: Number(formData.amount_required),
-    equity_percentage: Number(formData.equity_percentage),
-
-    media: uploadedMedia,
-    documents: uploadedDocs,
-  } as CreateIdeaModel;
-
-  const res = await saveIdeaDraftApi(payload);
-
-  // First time only
-  if (!ideaId && res?.id) {
-    setIdeaId(res.id);
-  }
-
-  setCurrentStep(s => s + 1);
-  setIsSaving(false);
-};
-
-const handleFinalSubmit = async () => {
-  if (!ideaId) return;
-
-  const res = await saveIdeaDraftApi({
-    id: ideaId,
-    status: 'SUBMITTED',
-    ...formData,
-
-    revenue_12_months: formData['12_months_revenue_target'],
-    prior_project_experience: formData['Prior_Project_Experience'],
-    motivation_vision_statement: formData['Motivation_Vision_Statement'],
-    amount_required: Number(formData.amount_required),
-    equity_percentage: Number(formData.equity_percentage),
-    media: uploadedMedia,
-    documents: uploadedDocs,
-  } as CreateIdeaModel);
-
-  if (res.success) {
-    alert('Idea submitted successfully!');
-  } else {
-    alert('Error submitting idea: ' + res.message);
-  }
-
-  // redirect / success toast
-};
+      await saveDraft('DRAFT');
+      setCurrentStep((s) => Math.min(s + 1, formSections.length - 1));
+    };
 
 
+    const handleFinalSubmit = async () => {
+      const res = await saveDraft('SUBMITTED');
+      if (res?.success) {
+        alert('Idea submitted successfully!');
+        // redirect('/dashboard') or show success page
+      } else {
+        alert('Submission failed: ' + (res?.message || 'Unknown error'));
+      }
+    };
 
+    const handleFiles = (
+      files: FileList | null,
+      setter: React.Dispatch<React.SetStateAction<File[]>>
+    ) => {
+      if (!files) return;
+      setter((prev) => [...prev, ...Array.from(files)]);
+    };
 
-
-
-
-
-
+    const removeFile = (
+      index: number,
+      setter: React.Dispatch<React.SetStateAction<File[]>>
+    ) => {
+      setter((prev) => prev.filter((_, i) => i !== index));
+    };
 
 
   if (!mounted) return null;
 
-
-
-
-
   const currentSection = formSections[currentStep];
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === formSections.length - 1;
+  const isFirst = currentStep === 0;
+  const isLast = currentStep === formSections.length - 1;
+
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 grid grid-cols-1 lg:grid-cols-3">
@@ -350,75 +531,65 @@ const handleFinalSubmit = async () => {
             {currentSection.title}
           </h2>
 
-          <div className="space-y-6">
+          <div className="space-y-7">
             {currentSection.fields.map(field => (
               <div key={field.key} className="space-y-2">
                 <label className="text-sm font-semibold block mb-1">
                   {field.label}
                 </label>
 
-                {field.key === 'problem_statement' ||
-                field.key === 'solution_description' ||
-                field.key === 'existing_solutions' ||
-                field.key === 'differentiation' ||
-                field.key === 'client_benefits' ||
-                field.key === 'long_term_vision' ||
-                field.key === 'Motivation_Vision_Statement' ||
-                field.key === 'planned_price' ||
-                field.key === 'sales_channels' ||
-                field.key === '12_months_revenue_target' ||
-                field.key === 'startup_requirements' ||
-                field.key === 'main_risks' ||
-                field.key === 'goals_30_days' ||
-                field.key === 'targets_90_days' ||
-                field.key === 'objectives_12_months' ||
-                field.key === 'regulatory_considerations' ||
-                field.key === 'legal_risks' ||
-                field.key === 'certifications_licenses' ||
-                field.key === 'Prior_Project_Experience'
-                 ? (
-
-                  <div className="border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                {'isRichText' in field && field.isRichText ? (
+                  <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
                     <ReactQuill
                       theme="snow"
-                      value={formData[field.key] || ''}
-                      onChange={(htmlContent) =>
-                        setFormData({ ...formData, [field.key]: htmlContent })
-                      }
+                      value={(formData[field.key as keyof typeof formData] as string) || ''}
+                      onChange={(val) => setFormData((prev) => ({ ...prev, [field.key]: val }))}
                       modules={modules}
                       placeholder={field.placeholder}
-                      className="min-h-[180px]"
+                      className="min-h-[140px] md:min-h-[160px]"
                     />
                   </div>
-
-                ) : field.type === 'select' ? (
-
+                ) : 'type' in field && field.type === 'select' ? (
                   <select
-                    value={formData[field.key] || ''}
-                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                    className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={(formData[field.key as keyof typeof formData] as string) || ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Select {field.label.toLowerCase()}</option>
-                    {field.options?.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+                    {field.options.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
                       </option>
                     ))}
                   </select>
-
+                ) : 'type' in field && field.type === 'number' ? (
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder={field.placeholder}
+                    // value={formData[field.key as keyof typeof formData] ?? ''}
+                    value={(formData[field.key as keyof typeof formData] as string | number | undefined) ?? ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))
+                    }
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
                 ) : (
                   <input
                     type="text"
                     placeholder={field.placeholder}
-                    value={formData[field.key] || ''}
-                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={(formData[field.key as keyof typeof formData] as string) || ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))
+                    }
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 )}
               </div>
             ))}
 
-            {isLastStep && (
+
+            {isLast && (
               <div className="space-y-8">
                 <div>
                   <h3 className="text-sm font-semibold mb-3">Upload Media</h3>
@@ -527,17 +698,17 @@ const handleFinalSubmit = async () => {
           {/* NAVIGATION */}
           <div className="flex gap-4 mt-4 justify-between mt-8 py-5">
             <button
-              disabled={isFirstStep}
+              disabled={isFirst || isSaving}
               onClick={() => setCurrentStep(s => s - 1)}
               className="px-4 py-2 border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center"
             >
               <ChevronLeft className="inline w-4 h-4" /> Previous
             </button>
 
-            {isLastStep ? (
+            {isLast ? (
               <button
                 onClick={handleFinalSubmit}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg"
+                className="px-6 py-3 bg-green-600 text-white rounded-lg flex items-center"
               >
                 <Check className="w-4 h-4" /> Submit Idea
               </button>
@@ -545,22 +716,13 @@ const handleFinalSubmit = async () => {
               <button
                 onClick={handleNext}
                 disabled={isSaving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center"
               >
                 {isSaving ? 'Saving...' : 'Next'}
+                <ChevronRight className="inline w-4 h-4" />
               </button>
             )}
-
-
-            {/* <button
-              disabled={isLastStep}
-              onClick={() => setCurrentStep(s => s + 1)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md flex items-center"
-            >
-              Next <ChevronRight className="inline w-4 h-4" />
-            </button> */}
      
-
           </div>
         </div>
       </main>

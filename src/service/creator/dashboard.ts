@@ -1,96 +1,45 @@
-// service/creator/dashboard.ts
 import axios from '@/lib/axios';
-import { CreateIdeaModel } from '@/types/creator/create-idea-model';
+import { CreateIdeaModel, SaveIdeaResponse } from '@/types/creator/create-idea-model';
 
-export const saveIdeaDraftApi = async (model: CreateIdeaModel) => {
+export const saveIdeaDraftApi = async (
+  model: CreateIdeaModel
+): Promise<SaveIdeaResponse> => {
   const formData = new FormData();
 
+  // Append DTO fields
   Object.entries(model).forEach(([key, value]) => {
     if (
-      value !== undefined &&
-      value !== null &&
-      key !== 'media' &&
-      key !== 'documents'
-    ) {
-      formData.append(key, value.toString());
-    }
+      value === undefined ||
+      value === null ||
+      key === 'media' ||
+      key === 'documents' ||
+      key === 'id'
+    ) return;
+
+    formData.append(key, String(value));
   });
 
-  model.media?.forEach(file => formData.append('media', file));
-  model.documents?.forEach(file => formData.append('documents', file));
+  // Media
+  model.media?.forEach(file => {
+    formData.append('media', file);
+  });
 
-  const res = await axios.post(
+  // Documents
+  model.documents?.forEach(file => {
+    formData.append('documents', file);
+  });
+
+  const response = await axios.post<SaveIdeaResponse>(
     `/creator/new-idea/${model.id ?? ''}`,
-    formData,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }
+    formData
   );
 
-  return res.data as {
-    success: boolean;
-    message: string;
-    id: string;
-  };
-};
-
-
-export const getIdeaDraftApi = async (id: string) => {
-  const res = await axios.get(`/creator/idea/draft/${id}`);
-  return res.data as CreateIdeaModel;
-};
-
-
-export const submitIdeaApi = async (id: string) => {
-  const res = await axios.post(`/creator/idea/submit`, { id });
-  return res.data;
+  return response.data;
 };
 
 
 
 
-
-
-
-
-
-// export const createIdeaApi = async (model: CreateIdeaModel) => {
-//   const formData = new FormData();
-
-//   // Append normal fields
-//   Object.entries(model).forEach(([key, value]) => {
-//     if (
-//       key !== 'media' &&
-//       key !== 'documents' &&
-//       value !== undefined &&
-//       value !== null
-//     ) {
-//       formData.append(key, value.toString());
-//     }
-//   });
-
-//   // Append media
-//   model.media.forEach((file) => {
-//     formData.append('media', file);
-//   });
-
-//   // Append documents
-//   model.documents.forEach((file) => {
-//     formData.append('documents', file);
-//   });
-
-//   const response = await axios.post(
-//     '/creator/new-idea',
-//     formData,
-//     {
-//       headers: {
-//         'Content-Type': 'multipart/form-data',
-//       },
-//     }
-//   );
-
-//   return response.data;
-// };
 
 
 export const getDashboardStats = async () => {
