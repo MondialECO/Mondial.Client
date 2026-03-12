@@ -77,7 +77,7 @@ export default function MyIdeasPage() {
       createdDate: createdDate,
       marketSize: marketSizeText,
       offeredEquity: typeof apiIdea.equityOffered === 'number' ? `${apiIdea.equityOffered}%` : '0%',
-      pauseInfo: false,
+      pauseInfo: cardStatus === "approved",
     };
   });
 

@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,7 +12,7 @@ const investors = [
     concept: "Smart City Energy Grid",
     date: "22 January 2027",
     amount: "$90,000",
-    share: "4.00%",
+    equity: "4.00%",
     stage: "Seed",
   },
   {
@@ -19,7 +21,7 @@ const investors = [
     concept: "Sustainable Agriculture Tech",
     date: "15 February 2027",
     amount: "$75,000",
-    share: "3.25%",
+    equity: "3.25%",
     stage: "Series A",
   },
   {
@@ -28,7 +30,7 @@ const investors = [
     concept: "Wearable Health Monitoring",
     date: "01 January 2027",
     amount: "$110,000",
-    share: "5.00%",
+    equity: "5.00%",
     stage: "Angel",
   },
   {
@@ -37,8 +39,27 @@ const investors = [
     concept: "Eco-Friendly Packaging Solutions",
     date: "12 February 2027",
     amount: "$120,000",
-    share: "5.25%",
+    equity: "5.25%",
     stage: "Series B",
+  },
+]
+
+const equityDistributions = [
+  {
+    title: "Launch a Mobile Pet Grooming Service",
+    totalEquity: 25,
+    soldPercent: 12.5,
+    soldAmount: "$62,500",
+    availablePercent: 12.5,
+    availableAmount: "$62,500",
+  },
+  {
+    title: "Develop an AI-Powered Language Tutor",
+    totalEquity: 24,
+    soldPercent: 24,
+    soldAmount: "$120,000",
+    availablePercent: 0,
+    availableAmount: "",
   },
 ]
 
@@ -46,12 +67,19 @@ export default function InvestmentDashboard() {
   return (
     <div className="space-y-8">
 
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span>Dashboards</span>
+        <span>/</span>
+        <span className="text-foreground font-medium">Investors</span>
+      </div>
+
       {/* 1. QUICK STATS */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {[
           { label: "Total Raised", value: "$970K", trend: "+8.2%" },
-          { label: "Active Investors", value: "42", trend: "+3.1%" },
-          { label: "Avg Deal Size", value: "$24K", trend: "+5.4%" },
+          { label: "Total Raised", value: "$970K", trend: "+3.1%" },
+          { label: "Total Raised", value: "$970K", trend: "+5.4%" },
         ].map((item, i) => (
           <Card key={i} className="border shadow-sm">
             <CardContent className="p-6">
@@ -73,9 +101,9 @@ export default function InvestmentDashboard() {
       </div>
 
       {/* 2. INVESTOR INSIGHTS */}
-      <Card className="border shadow">
+      <Card className="border shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle>Investor Insights</CardTitle>
+          <CardTitle className="text-lg">Investor Insights</CardTitle>
           <p className="text-sm text-muted-foreground">
             Explore investment prospects and manage your investments
           </p>
@@ -88,7 +116,7 @@ export default function InvestmentDashboard() {
             <table className="w-full min-w-[900px]">
               <thead className="bg-muted/50">
                 <tr>
-                  {["Investor", "Concept", "Created", "Investment", "Share", "Stage"].map(
+                  {["Investor", "Concept", "Created", "Investment", "Equity", "Stage"].map(
                     (h) => (
                       <th
                         key={h}
@@ -126,7 +154,7 @@ export default function InvestmentDashboard() {
                       {row.date}
                     </td>
                     <td className="px-6 py-4 font-medium">{row.amount}</td>
-                    <td className="px-6 py-4 text-sm">{row.share}</td>
+                    <td className="px-6 py-4 text-sm">{row.equity}</td>
                     <td className="px-6 py-4">
                       <Badge variant="outline" className="text-xs">
                         {row.stage}
@@ -169,8 +197,8 @@ export default function InvestmentDashboard() {
                     <div className="font-medium">{row.amount}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Share</div>
-                    <div>{row.share}</div>
+                    <div className="text-muted-foreground">Equity</div>
+                    <div>{row.equity}</div>
                   </div>
                   <div>
                     <div className="text-muted-foreground">Created</div>
@@ -191,67 +219,52 @@ export default function InvestmentDashboard() {
       </Card>
 
       {/* 3. EQUITY DISTRIBUTION */}
-      <Card className="border shadow">
+      <Card className="border shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle>Equity Distribution by Idea</CardTitle>
+          <CardTitle className="text-lg">Equity Distribution by Idea</CardTitle>
           <p className="text-sm text-muted-foreground">
             Manage your ideas in this space
           </p>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {[
-            {
-              title: "Launch a Mobile Pet Grooming Service",
-              sold: 12,
-              total: 25,
-              soldText: "Sold 12.50% ($15,000)",
-              availableText: "Available 13.00% ($40,000)",
-            },
-            {
-              title: "Develop an AI-Powered Language Tutor",
-              sold: 22,
-              total: 30,
-              soldText: "Sold 22.50%",
-              availableText: "Available 23.00%",
-            },
-            {
-              title: "Establish a Vertical Hydroponics System",
-              sold: 100,
-              total: 100,
-              soldText: "100% of equity sold",
-              availableText: "",
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className="space-y-3 rounded-lg border bg-card/50 p-6 hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-md bg-primary/10 p-2">
-                    <ArrowUpRight className="h-5 w-5 text-primary" />
+          {equityDistributions.map((item, i) => {
+            const soldWidth = item.totalEquity > 0 ? (item.soldPercent / item.totalEquity) * 100 : 0
+            const isFull = item.soldPercent >= item.totalEquity
+
+            return (
+              <div
+                key={i}
+                className="space-y-3 rounded-lg border bg-card/50 p-6 hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-md bg-primary/10 p-2">
+                      <ArrowUpRight className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-base font-medium">{item.title}</h3>
                   </div>
-                  <h3 className="text-lg font-medium">{item.title}</h3>
+                  <span className="text-sm text-muted-foreground">
+                    Total Equity {item.totalEquity.toFixed(2)}%
+                  </span>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {item.sold}% sold of {item.total}%
-                </span>
-              </div>
 
-              <div className="relative h-3 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="absolute inset-y-0 left-0 bg-primary transition-all"
-                  style={{ width: `${item.sold}%` }}
-                />
-              </div>
+                <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`absolute inset-y-0 left-0 rounded-full transition-all ${isFull ? "bg-emerald-500" : "bg-primary"}`}
+                    style={{ width: `${soldWidth}%` }}
+                  />
+                </div>
 
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{item.soldText}</span>
-                {item.availableText && <span>{item.availableText}</span>}
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-xs text-muted-foreground">
+                  <span>Sold {item.soldPercent.toFixed(2)}% {item.soldAmount && `(${item.soldAmount})`}</span>
+                  {item.availablePercent > 0 && (
+                    <span>Available {item.availablePercent.toFixed(2)}% {item.availableAmount && `(${item.availableAmount})`}</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </CardContent>
       </Card>
 

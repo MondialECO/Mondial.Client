@@ -62,7 +62,7 @@ const BADGE_COLOR_MAP: Record<string, string> = {
 import { pauseIdeaApi } from "@/service/creator/dashboard"
 
 export default function IdeaCard({ idea }: IdeaCardProps) {
-  const [isPaused, setIsPaused] = useState(idea.pauseInfo)
+  const [isPaused, setIsPaused] = useState(false)
   const [isPausing, setIsPausing] = useState(false)
   const status = STATUS_MAP[idea.status]
 
@@ -160,7 +160,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       </div>
 
       {/* Pause */}
-      {idea.status === "approved" && (
+      {idea.pauseInfo && (
         <div className="mt-3 pt-3 border-t flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-sm">

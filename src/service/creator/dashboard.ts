@@ -53,7 +53,7 @@ export const getDashboardMyIdeas = async () => {
 }
 
 export const pauseIdeaApi = async (ideaId: string) => {
-  const response = await axios.post(`/creator/pause-idea/${ideaId}`);
+  const response = await axios.post(`/creator/toggle-idea/${ideaId}`);
   return response.data;
 }
 
