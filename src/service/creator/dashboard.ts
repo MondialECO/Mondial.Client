@@ -43,6 +43,6 @@ export const saveIdeaDraftApi = async (
 
 
 export const getDashboardStats = async () => {
-  const response = await axios.get("/creator/dashboard/stats");
+  const response = await axios.get("/creator/dashboard");
   return response.data;
 }

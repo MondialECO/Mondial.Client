@@ -1,28 +1,44 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { 
-  CheckCircle2, 
-  TrendingUp, 
-  Users, 
-  Lightbulb, 
-  DollarSign 
+import {
+  CheckCircle2,
+  TrendingUp,
+  Users,
+  Lightbulb,
+  DollarSign,
+  Loader2
 } from "lucide-react"
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getDashboardStats } from "@/service/creator/dashboard";
 
+type Idea = {
+  id: string;
+  name: string;
+  status: string;
+  stageLabel: string | null;
+  isPublished: boolean;
+  createdAt: string;
+  fundingRequired: number;
+  equityOffered: number;
+  totalRaised: number;
+  fundingProgress: number;
+  investors: any[];
+}
 
-type Project = {
-  status: "Approved" | "Pending"
-  type: string
-  title: string
-  date: string
-  fundedPercent: number
-  raised: number
-  target: number
-  equity: number
-  avatars: number
+type DashboardStats = {
+  totalIdeas: number;
+  totalClicksLast14Days: number;
+  totalFundRaised: number;
+  totalRequired: number;
+  totalEquity: number;
+  activeInvestors: number;
+  ideas: Idea[];
 }
 
 type Investor = {
@@ -32,41 +48,6 @@ type Investor = {
   avatarUrl?: string
 }
 
-const stats = {
-  projectIdeas: 3,
-  viewsToday: 14,
-  growth: 4.1,
-  fundsRaised: 40000,
-  fundsRequired: 100000,
-  totalEquity: 40,
-  totalInvestors: 5,
-}
-
-const projects: Project[] = [
-  {
-    status: "Approved",
-    type: "Web",
-    title: "Eco-Friendly Packaging Solutions",
-    date: "15 May, 2026",
-    fundedPercent: 80,
-    raised: 48000,
-    target: 60000,
-    equity: 30,
-    avatars: 3,
-  },
-  {
-    status: "Pending",
-    type: "Mobile",
-    title: "AI-Driven Healthcare Diagnostics",
-    date: "22 June, 2026",
-    fundedPercent: 60,
-    raised: 36000,
-    target: 60000,
-    equity: 20,
-    avatars: 3,
-  },
-]
-
 const topInvestors: Investor[] = [
   { name: "Sarah Ahmed", username: "sarah_invests", invested: "$45,000", avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80" },
   { name: "Rahim Khan", username: "rahim_k", invested: "$32,500", avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80" },
@@ -74,15 +55,49 @@ const topInvestors: Investor[] = [
 ]
 
 export default function CreatorDashboard() {
+  const [data, setData] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await getDashboardStats();
+        setData(stats);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="w-full max-w-7xl mx-auto text-center py-12 text-red-500">
+        <p>Failed to load dashboard data.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 pb-8">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Creator Dashboard</h1>
           <p className="text-sm text-muted-foreground">Hello Back, Jona!</p>
         </div>
-        <Button asChild size="sm">
+        <Button asChild size="sm" className="w-full sm:w-auto">
           <Link href="/create-project">+ Create Project</Link>
         </Button>
       </div>
@@ -96,13 +111,13 @@ export default function CreatorDashboard() {
                 <Lightbulb className="h-4 w-4 text-fuchsia-600" />
                 <span className="text-sm font-medium text-muted-foreground">Project Ideas</span>
               </div>
-              <span className="text-2xl font-bold">{stats.projectIdeas}</span>
+              <span className="text-2xl font-bold">{data.totalIdeas}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">+{stats.viewsToday} today</span>
+              <span className="text-muted-foreground">+{data.totalClicksLast14Days} last 14 days</span>
               <div className="flex items-center gap-1 text-lime-600 dark:text-lime-500">
                 <TrendingUp className="h-3 w-3" />
-                <span className="font-medium">{stats.growth}%</span>
+                <span className="font-medium">--%</span>
               </div>
             </div>
           </CardContent>
@@ -116,12 +131,12 @@ export default function CreatorDashboard() {
                 <span className="text-sm font-medium text-muted-foreground">Funds Raised</span>
               </div>
               <span className="text-2xl font-bold">
-                ${stats.fundsRaised.toLocaleString()}
+                ${data.totalFundRaised.toLocaleString()}
               </span>
             </div>
             <div className="text-xs text-muted-foreground">
               Required: <span className="text-foreground font-medium">
-                ${stats.fundsRequired.toLocaleString()}
+                ${data.totalRequired.toLocaleString()}
               </span>
             </div>
           </CardContent>
@@ -134,11 +149,11 @@ export default function CreatorDashboard() {
                 <Users className="h-4 w-4 text-violet-600" />
                 <span className="text-sm font-medium text-muted-foreground">Total Equity</span>
               </div>
-              <span className="text-2xl font-bold">{stats.totalEquity}%</span>
+              <span className="text-2xl font-bold">{data.totalEquity}%</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              Investors: <span className="text-foreground font-medium">
-                {stats.totalInvestors}
+              Active Investors: <span className="text-foreground font-medium">
+                {data.activeInvestors}
               </span>
             </div>
           </CardContent>
@@ -156,52 +171,64 @@ export default function CreatorDashboard() {
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5 space-y-4">
-            {projects.map((project) => (
-              <div key={project.title} className="border rounded-lg p-4 bg-card/50">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge 
-                    variant={project.status === "Approved" ? "default" : "secondary"}
-                    className="text-xs px-2.5 py-0.5"
-                  >
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    {project.status}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs px-2.5 py-0.5">
-                    {project.type}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs px-2.5 py-0.5">
-                    Online
-                  </Badge>
-                </div>
-
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-medium text-base leading-tight">
-                      {project.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {project.date}
-                    </p>
-                  </div>
-                  <div className="flex -space-x-2">
-                    {[...Array(project.avatars)].map((_, i) => (
-                      <div key={i} className="h-6 w-6 rounded-full border-2 border-background bg-muted" />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-medium">
-                    <span>{project.fundedPercent}% funded</span>
-                  </div>
-                  <Progress value={project.fundedPercent} className="h-1.5" />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>${project.raised.toLocaleString()} / ${project.target.toLocaleString()}</span>
-                    <span>{project.equity}% equity</span>
-                  </div>
-                </div>
+            {data.ideas.length === 0 ? (
+              <div className="text-center py-6 text-sm text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
+                No project ideas found. Create one to get started!
               </div>
-            ))}
+            ) : (
+              data.ideas.map((project) => (
+                <div key={project.id} className="border rounded-lg p-4 bg-card/50">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <Badge
+                      variant={project.status === "APPROVED" ? "default" : "secondary"}
+                      className="text-xs px-2.5 py-0.5"
+                    >
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      {project.status}
+                    </Badge>
+                    {project.stageLabel && (
+                      <Badge variant="outline" className="text-xs px-2.5 py-0.5">
+                        {project.stageLabel}
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-xs px-2.5 py-0.5">
+                      {project.isPublished ? "Published" : "Draft"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex justify-between items-start gap-4 mb-3">
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-base leading-tight truncate">
+                        {project.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {project.createdAt !== '0001-01-01T00:00:00Z'
+                          ? new Date(project.createdAt).toLocaleDateString()
+                          : 'Just now'}
+                      </p>
+                    </div>
+                    {project.investors && project.investors.length > 0 && (
+                      <div className="flex items-center -space-x-2 shrink-0">
+                        {project.investors.slice(0, 3).map((investor, i) => (
+                          <div key={i} className="h-6 w-6 rounded-full border-2 border-background bg-muted" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span>{project.fundingProgress}% funded</span>
+                    </div>
+                    <Progress value={project.fundingProgress} className="h-1.5" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>${project.totalRaised.toLocaleString()} / ${project.fundingRequired.toLocaleString()}</span>
+                      <span>{project.equityOffered}% equity</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -218,7 +245,7 @@ export default function CreatorDashboard() {
           </CardHeader>
           <CardContent className="px-5 pb-5 space-y-3">
             {topInvestors.map((investor) => (
-              <div 
+              <div
                 key={investor.username}
                 className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 transition-colors"
               >
@@ -226,7 +253,7 @@ export default function CreatorDashboard() {
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={investor.avatarUrl} />
                     <AvatarFallback className="text-xs">
-                      {investor.name.split(" ").map(n => n[0]).join("").slice(0,2)}
+                      {investor.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                   <div>

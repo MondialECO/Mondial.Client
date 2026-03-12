@@ -18,7 +18,7 @@ export default function DashboardLayout({
 
         {/* RIGHT: TOPBAR + CONTENT */}
         <div className="flex flex-1 flex-col">
-          
+
           {/* Topbar only takes CONTENT width */}
           <Topbar />
 
