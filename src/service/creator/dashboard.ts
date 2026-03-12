@@ -56,3 +56,23 @@ export const pauseIdeaApi = async (ideaId: string) => {
   const response = await axios.post(`/creator/pause-idea/${ideaId}`);
   return response.data;
 }
+
+export const getInvestorIdeas = async () => {
+  const response = await axios.get("/creator/investor-ideas");
+  return response.data;
+}
+
+export const getProfile = async () => {
+  const response = await axios.get("/creator/profile");
+  return response.data;
+}
+
+export const getBilling = async () => {
+  const response = await axios.get("/creator/billing");
+  return response.data;
+}
+
+export const getSettings = async () => {
+  const response = await axios.get("/creator/settings");
+  return response.data;
+}

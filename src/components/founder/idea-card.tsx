@@ -160,7 +160,7 @@ export default function IdeaCard({ idea }: IdeaCardProps) {
       </div>
 
       {/* Pause */}
-      {idea.pauseInfo && (
+      {idea.status === "approved" && (
         <div className="mt-3 pt-3 border-t flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-sm">
