@@ -46,3 +46,13 @@ export const getDashboardStats = async () => {
   const response = await axios.get("/creator/dashboard");
   return response.data;
 }
+
+export const getDashboardMyIdeas = async () => {
+  const response = await axios.get("/creator/my-ideas");
+  return response.data;
+}
+
+export const pauseIdeaApi = async (ideaId: string) => {
+  const response = await axios.post(`/creator/pause-idea/${ideaId}`);
+  return response.data;
+}
