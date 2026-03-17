@@ -1,3 +1,4 @@
+@import "../styles/fonts.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -122,6 +123,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
