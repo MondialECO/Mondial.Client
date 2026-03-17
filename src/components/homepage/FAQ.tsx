@@ -1,7 +1,6 @@
 'use client'
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
-import { Link } from "wouter";
 
 interface FAQItem {
     question: string;

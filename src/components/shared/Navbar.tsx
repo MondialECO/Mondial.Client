@@ -1,42 +1,69 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="w-full h-20 flex items-center justify-between px-8 md:px-12 z-50 relative">
-      <div className="flex items-center gap-3">
-        {/* Logo Icon */}
-        <div className="w-8 h-8 rounded-lg bg-[#3D63DD] flex items-center justify-center -rotate-12">
-          <svg
-            className="w-4 h-4 text-white rotate-12"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+    <header className="w-full fixed top-6 left-0 z-50 flex justify-center px-4">
+      {/* Container */}
+      <div className="w-full max-w-[1200px] h-[60px] bg-white/70 backdrop-blur-md rounded-[16px] flex items-center justify-between px-6">
+
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 bg-[#3C61DD] rounded-[10px] flex items-center justify-center relative">
+            {/* optional arrow decoration */}
+            <span className="absolute w-4 border-2 border-[#F7F7F9] rotate-[-29deg]" />
+          </div>
+
+          <span className="text-[16px] font-normal text-[#3E3E3E] tracking-[-0.02em]">
+            Mondial
+          </span>
         </div>
-        {/* Logo Text */}
-        <span className="font-instrument font-medium text-lg text-[#070707]">Mondial</span>
-      </div>
 
-      {/* Navigation Links */}
-      <div className="hidden md:flex items-center gap-8 px-6 py-2 rounded-full bg-white/40 shadow-sm border border-black/5 backdrop-blur-md">
-        <Link href="#" className="font-instrument text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Concept</Link>
-        <Link href="#" className="font-instrument text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">How It Works</Link>
-        <Link href="#" className="font-instrument text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Pricing</Link>
-        <Link href="#" className="font-instrument text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">FAQ&apos;s</Link>
-      </div>
+        {/* Navigation */}
+        <nav className="hidden md:flex items-center gap-6">
+          <NavItem label="Concept" active />
+          <NavItem label="Features" />
+          <NavItem label="Pricing" />
+          <NavItem label="FAQ" />
+        </nav>
 
-      {/* Action Button */}
-      <div className="flex items-center">
-        <Link href="/signup" className="px-6 py-2.5 bg-[#3D63DD] text-white text-sm font-medium rounded-full hover:bg-blue-700 transition-colors inline-block">
-          Join Free
-        </Link>
+        {/* Button */}
+        <div className="hidden md:block">
+          <button className="h-[36px] px-4 rounded-full bg-[#3C61DD] text-[13px] font-semibold text-white">
+            Get Started
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <button className="md:hidden text-sm">
+          ☰
+        </button>
       </div>
-    </nav>
+    </header>
+  );
+}
+
+/* ================= NAV ITEM ================= */
+
+function NavItem({
+  label,
+  active = false,
+}: {
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <Link href="#">
+      <span
+        className={`px-2 py-1 text-[14px] font-medium rounded-[8px] transition
+        ${active
+            ? "bg-[#F1F1F2] text-[#5E5E5E]"
+            : "text-[#5E5E5E] hover:bg-[#F1F1F2]"
+          }`}
+      >
+        {label}
+      </span>
+    </Link>
   );
 }

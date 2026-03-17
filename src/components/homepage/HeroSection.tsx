@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 
-export default function Hero() {
+export default function HeroSection() {
     const [scrollY, setScrollY] = useState(0);
 
     useEffect(() => {
@@ -16,12 +16,17 @@ export default function Hero() {
     return (
         <section className="relative w-full min-h-screen flex flex-col items-center pt-20 md:pt-24 pb-20 md:pb-32 overflow-hidden bg-[#FAFAFA]">
 
-            {/* HERO GRADIENT BACKGROUND */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ECECED] to-[#FAFAFA]" />
+            {/* 🌫️ Background System */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ECECED] to-[#FAFAFA]" />
+
+                {/* subtle glow */}
+                <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-white/50 blur-[120px]" />
+            </div>
 
             <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
 
-                {/* Avatars */}
+                {/* 👤 Avatars */}
                 <div className="flex flex-col items-center mb-6 md:mb-8">
                     <div className="flex -space-x-2 mb-3">
                         <div className="w-9 h-9 md:w-10 md:h-10 rounded-full border-2 border-white bg-[#ebd5c1] flex items-center justify-center text-lg shadow-sm z-40">👩🏽</div>
@@ -35,7 +40,7 @@ export default function Hero() {
                     </div>
                 </div>
 
-                {/* Heading */}
+                {/* 🧠 Heading */}
                 <h1
                     className="text-[#070707] font-normal tracking-tight mb-6 md:mb-8"
                     style={{
@@ -46,7 +51,7 @@ export default function Hero() {
                     }}
                 >
                     The first Social <br />
-                    Credit
+                    Credit{' '}
                     <span
                         style={{
                             fontFamily: '"Playfair Display", serif',
@@ -54,59 +59,67 @@ export default function Hero() {
                             fontStyle: 'italic',
                         }}
                     >
-                        {' '}Creation.
+                        Creation.
                     </span>
                 </h1>
 
-                {/* Subtitle */}
-                <p
-                    className="text-[16px] md:text-[22px] leading-relaxed text-[#555555] max-w-xl md:max-w-2xl mb-10 md:mb-12"
-                    style={{ fontFamily: '"Instrument Sans", sans-serif' }}
-                >
-                    A premium ecosystem connecting <strong className="text-[#070707] font-semibold">creators</strong> and <strong className="text-[#070707] font-semibold">investors</strong>
+                {/* ✍️ Subtitle */}
+                <p className="text-[16px] md:text-[22px] leading-relaxed text-[#555555] max-w-xl md:max-w-2xl mb-10 md:mb-12">
+                    A premium ecosystem connecting{' '}
+                    <strong className="text-[#070707] font-semibold">creators</strong> and{' '}
+                    <strong className="text-[#070707] font-semibold">investors</strong>
                     <br className="hidden md:block" />
                     through Project Intelligence.
                 </p>
 
-                {/* CTA BUTTONS (SIDE BY SIDE) */}
+                {/* 🚀 CTA */}
                 <div className="flex gap-4 mb-16 md:mb-20">
-
-                    <button
-                        className="px-8 py-3.5 md:px-10 md:py-4 bg-white text-[#070707] text-base md:text-lg font-medium rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors"
-                        style={{ fontFamily: '"Instrument Sans", sans-serif' }}
-                    >
+                    <button className="px-8 py-3.5 md:px-10 md:py-4 bg-white text-[#070707] text-base md:text-lg font-medium rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
                         Get a Demo
                     </button>
 
                     <Link
                         href="/signup"
                         className="px-8 py-3.5 md:px-10 md:py-4 bg-[#3D63DD] text-white text-base md:text-lg font-medium rounded-full shadow-md hover:bg-blue-700 transition-colors inline-block"
-                        style={{ fontFamily: '"Instrument Sans", sans-serif' }}
                     >
                         Join Free
                     </Link>
-
                 </div>
 
-                {/* Dashboard Image */}
-                <div
-                    className="w-full max-w-[1100px] border border-gray-200 rounded-[12px] shadow-xl flex overflow-hidden relative transition-transform duration-500 ease-out will-change-transform"
-                    style={{
-                        transform: `translateY(${scrollY * -0.05}px) scale(${1 + scrollY * 0.0001})`,
-                    }}
-                >
-                    <Image
-                        src="/dashboard-mockup.png"
-                        alt="Dashboard Interface"
-                        width={1100}
-                        height={600}
-                        className="w-full h-auto object-cover"
-                        priority
-                    />
+                {/* 🖥️ Dashboard */}
+                <div className="relative w-full max-w-[1100px] mt-10 md:mt-0">
+
+                    {/* 🔥 Bottom fade bridge */}
+                    <div className="absolute bottom-0 left-0 w-full h-[220px] bg-gradient-to-b from-transparent via-[#FAFAFA]/70 to-[#FAFAFA] z-30 pointer-events-none" />
+
+                    {/* 🖼️ Image container */}
+                    <div
+                        className="relative rounded-[18px] overflow-hidden border border-white/60
+            shadow-[0_40px_120px_rgba(0,0,0,0.12)]
+            will-change-transform transition-transform duration-500 ease-out"
+                        style={{
+                            transform: `translateY(${scrollY * -0.04}px)`,
+                        }}
+                    >
+
+                        {/* 🔥 depth overlay (fix light UI issue) */}
+                        <div className="absolute inset-0 bg-black/5 z-10 pointer-events-none" />
+
+                        {/* subtle bottom darkening */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 z-10 pointer-events-none" />
+
+                        <Image
+                            src="/dashboard-mockup.png"
+                            alt="Dashboard Interface"
+                            width={1100}
+                            height={650}
+                            className="w-full h-auto object-cover"
+                            priority
+                        />
+                    </div>
                 </div>
 
             </div>
-
         </section>
     );
 }
